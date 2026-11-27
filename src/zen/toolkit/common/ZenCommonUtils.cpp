@@ -76,6 +76,29 @@ ZenCommonUtils::ReturnToPreviousApplication() {
 }
 
 NS_IMETHODIMP
+ZenCommonUtils::KeepWindowsBehindPreviousApplication() {
+  KeepWindowsBehindPreviousApplicationInternal();
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+ZenCommonUtils::PrepareFloatingWindow(mozIDOMWindowProxy* aWindow) {
+  PrepareFloatingWindowInternal(aWindow);
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+ZenCommonUtils::PresentFloatingWindow(mozIDOMWindowProxy* aWindow) {
+  PresentFloatingWindowInternal(aWindow);
+  return NS_OK;
+}
+
+NS_IMETHODIMP
+ZenCommonUtils::GetPointerPosition(int32_t* aX, int32_t* aY) {
+  return GetPointerPositionInternal(aX, aY);
+}
+
+NS_IMETHODIMP
 ZenCommonUtils::CanShare(bool* canShare) {
   auto aWindow = GetMostRecentWindow();
   if (!aWindow) {

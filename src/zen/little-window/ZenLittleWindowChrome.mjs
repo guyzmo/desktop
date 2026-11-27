@@ -104,6 +104,11 @@ class nsZenLittleWindow extends nsZenDOMOperatedFeature {
     this.#rememberSize();
     this.#nameWindow();
 
+    // A window with only the URL bar is shown later, once that is ready.
+    if (!this.#urlbarOnly) {
+      window.delayedStartupPromise.then(() => this.#presentFloatingWindow());
+    }
+
     // The space the page would go to can change while this window is in the
     // background.
     window.addEventListener("activate", () => this.#updateOpenLabel());
@@ -487,6 +492,20 @@ class nsZenLittleWindow extends nsZenDOMOperatedFeature {
     this.#isWaitingToShow = false;
     this.#baseWindow.visibility = true;
     window.focus();
+    this.#presentFloatingWindow();
+  }
+
+  /**
+   * Makes a window that can show over other applications' fullscreen Spaces
+   * key, and keeps it on the Space it was just shown on.
+   */
+  #presentFloatingWindow() {
+    if (
+      document.documentElement.getAttribute("macnativefullscreen") == "false"
+    ) {
+      // eslint-disable-next-line mozilla/valid-services
+      Services.zen.presentFloatingWindow(window);
+    }
   }
 
   async #urlbarPlaceholderSettled() {
@@ -562,6 +581,7 @@ class nsZenLittleWindow extends nsZenDOMOperatedFeature {
     gBrowser.removeTabsProgressListener(this.#urlbarOnlyProgressListener);
     this.#urlbarOnlyProgressListener = null;
     const root = document.documentElement;
+    root.setAttribute("zen-little-window-expanding", "true");
     root.removeAttribute(URLBAR_ONLY_ATTRIBUTE);
     root.style.removeProperty(URLBAR_ONLY_WIDTH_PROPERTY);
     root.style.removeProperty(URLBAR_ONLY_HEIGHT_PROPERTY);
@@ -582,6 +602,9 @@ class nsZenLittleWindow extends nsZenDOMOperatedFeature {
       );
       window.resizeTo(width, height);
       window.moveTo(x, y);
+      this.#limitsApplied().then(() =>
+        root.removeAttribute("zen-little-window-expanding")
+      );
       this.#maybeShowIntro();
     });
   }
